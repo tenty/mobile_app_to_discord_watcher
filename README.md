@@ -59,6 +59,8 @@ Add this line:
 0 */6 * * * /usr/bin/python3 /path/to/AppWatch/check_tesla_app.py >> /path/to/AppWatch/cron.log 2>&1
 ```
 
+*Note: `cron.log` file will be created automatically if you use cron for automation.*
+
 ## Discord Notifications
 
 - **iOS updates**: White embed color (0xFFFFFF)
@@ -73,7 +75,6 @@ Add this line:
 - `.env.example`: Example environment variables
 - `tesla_app_ios_version_history.json`: iOS version history (created on first run)
 - `tesla_app_android_version_history.json`: Android version history (created on first run)
-- `cron.log`: Cron job output log
 
 ## Version History Logic
 
@@ -108,4 +109,4 @@ Add this line:
 - ✅ **Full version history**: Tracks all recent versions, not just immediate previous
 - ✅ **Complete data**: Preserves release notes and dates for all versions
 - ✅ **Automatic cleanup**: Keeps only last 10 versions to manage file size
-- ✅ **Rich comparison**: Can compare current version with any previous version
+- ✅ **Simple Discord reporting**: Only shows old vs new version (clean and focused)
