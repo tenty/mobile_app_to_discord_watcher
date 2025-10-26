@@ -161,13 +161,20 @@ def save_current_version(version, release_notes="", platform='ios'):
         json.dump(data, f, indent=2)
 
 def send_discord_webhook(platform, old_version, new_version, old_notes, new_notes, release_date):
-    """Send Discord notification about version change"""
-    webhook_url = os.getenv('DISCORD_WEBHOOK_URL')
+    """Send Discord notification about version change to multiple webhooks"""
+    webhook_urls_str = os.getenv('DISCORD_WEBHOOK_URLS')
     avatar_url = os.getenv('DISCORD_AVATAR_URL')
     bot_name = os.getenv('DISCORD_BOT_NAME', 'Tesla App Watcher')
     
-    if not webhook_url:
-        print("❌ Discord webhook URL not found in environment variables")
+    if not webhook_urls_str:
+        print("❌ Discord webhook URLs not found in environment variables")
+        return
+    
+    # Split comma-separated webhook URLs
+    webhook_urls = [url.strip() for url in webhook_urls_str.split(',') if url.strip()]
+    
+    if not webhook_urls:
+        print("❌ No valid Discord webhook URLs found")
         return
     
     # Set embed color based on platform
@@ -225,12 +232,23 @@ def send_discord_webhook(platform, old_version, new_version, old_notes, new_note
         "username": bot_name
     }
     
-    try:
-        response = requests.post(webhook_url, json=payload, timeout=10)
-        response.raise_for_status()
-        print(f"✅ Discord notification sent for {platform_name} update!")
-    except Exception as e:
-        print(f"❌ Failed to send Discord notification: {e}")
+    # Send to all webhook URLs
+    success_count = 0
+    for i, webhook_url in enumerate(webhook_urls, 1):
+        try:
+            response = requests.post(webhook_url, json=payload, timeout=10)
+            response.raise_for_status()
+            success_count += 1
+            print(f"✅ Discord notification {i}/{len(webhook_urls)} sent for {platform_name} update!")
+        except Exception as e:
+            print(f"❌ Failed to send Discord notification {i}/{len(webhook_urls)}: {e}")
+    
+    if success_count == len(webhook_urls):
+        print(f"✅ All {success_count} Discord notifications sent successfully!")
+    elif success_count > 0:
+        print(f"⚠️ {success_count}/{len(webhook_urls)} Discord notifications sent")
+    else:
+        print(f"❌ All Discord notifications failed")
 
 def check_ios_app():
     """Check iOS Tesla app version"""

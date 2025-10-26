@@ -39,10 +39,12 @@ python3 check_tesla_app.py
 Create a `.env` file with the following variables:
 
 ```env
-DISCORD_WEBHOOK_URL=your_discord_webhook_url_here
-DISCORD_AVATAR_URL=https://images.seeklogo.com/logo-png/50/1/tesla-logo-png_seeklogo-506161.png
-DISCORD_BOT_NAME=Tesla App Watcher
+DISCORD_WEBHOOK_URLS=your_discord_webhook_url_here,another_webhook_url_here
+DISCORD_AVATAR_URL=your_avatar_url_here
+DISCORD_BOT_NAME=your_bot_name_here
 ```
+
+**Multiple Webhooks**: You can specify multiple Discord webhook URLs separated by commas. The script will send notifications to all of them.
 
 ## Automation
 
