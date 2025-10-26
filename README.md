@@ -71,6 +71,41 @@ Add this line:
 - `check_tesla_app.py`: Main monitoring script
 - `.env`: Environment variables (not tracked in git)
 - `.env.example`: Example environment variables
-- `tesla_app_ios_version.json`: iOS version history
-- `tesla_app_android_version.json`: Android version history
+- `tesla_app_ios_version_history.json`: iOS version history (created on first run)
+- `tesla_app_android_version_history.json`: Android version history (created on first run)
 - `cron.log`: Cron job output log
+
+## Version History Logic
+
+**JSON files are created on first run** and maintain full version history:
+
+### File Structure (`tesla_app_{platform}_version_history.json`):
+```json
+{
+  "platform": "ios|android",
+  "last_updated": "2025-10-26T01:12:00.367696",
+  "history": [
+    {
+      "version": "4.50.1",
+      "release_notes": "This release contains minor fixes and improvements.",
+      "release_date": "23 Oct 2025",
+      "last_checked": "2025-10-26T01:12:00.367689"
+    }
+  ]
+}
+```
+
+**How it works**:
+1. **First run**: Creates JSON file with current version as baseline
+2. **Subsequent runs**: Compares current version with latest stored version
+3. **Version change detected**: 
+   - Sends Discord notification with old vs new version
+   - Adds new version to beginning of history array
+   - **Preserves all previous versions** (keeps last 10 versions)
+4. **History management**: Automatically maintains last 10 versions to prevent file bloat
+
+**Benefits**:
+- ✅ **Full version history**: Tracks all recent versions, not just immediate previous
+- ✅ **Complete data**: Preserves release notes and dates for all versions
+- ✅ **Automatic cleanup**: Keeps only last 10 versions to manage file size
+- ✅ **Rich comparison**: Can compare current version with any previous version

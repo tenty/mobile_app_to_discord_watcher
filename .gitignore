@@ -172,7 +172,7 @@ __marimo__/
 cron.log
 
 # Version history files
-tesla_app_*_version.json
+tesla_app_*_version*.json
 
 # IDE
 .vscode/

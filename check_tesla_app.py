@@ -137,26 +137,54 @@ def get_play_store_info(app_url):
         print(f"Error fetching Play Store info: {e}")
         return None, None, None, None, None, None, None
 
-def load_previous_version(platform='ios'):
-    """Load previously stored version"""
-    filename = f'tesla_app_{platform}_version.json'
+def load_version_history(platform='ios'):
+    """Load version history for a platform"""
+    filename = f'tesla_app_{platform}_version_history.json'
     if os.path.exists(filename):
         try:
             with open(filename, 'r') as f:
                 data = json.load(f)
-                return data.get('version'), data.get('last_checked'), data.get('release_notes', '')
+                return data.get('history', [])
         except:
             pass
+    return []
+
+def get_latest_version(platform='ios'):
+    """Get the latest version from history"""
+    history = load_version_history(platform)
+    if history:
+        latest = history[0]  # Most recent is first
+        return latest.get('version'), latest.get('last_checked'), latest.get('release_notes', '')
     return None, None, ""
 
-def save_current_version(version, release_notes="", platform='ios'):
-    """Save current version to file"""
-    filename = f'tesla_app_{platform}_version.json'
-    data = {
+def save_version_history(version, release_notes="", release_date="", platform='ios'):
+    """Save version to history file"""
+    filename = f'tesla_app_{platform}_version_history.json'
+    
+    # Load existing history
+    history = load_version_history(platform)
+    
+    # Create new version entry
+    new_entry = {
         'version': version,
         'release_notes': release_notes,
+        'release_date': release_date,
         'last_checked': datetime.now().isoformat()
     }
+    
+    # Add to beginning of history (most recent first)
+    history.insert(0, new_entry)
+    
+    # Keep only last 10 versions to prevent file from growing too large
+    history = history[:10]
+    
+    # Save updated history
+    data = {
+        'platform': platform,
+        'last_updated': datetime.now().isoformat(),
+        'history': history
+    }
+    
     with open(filename, 'w') as f:
         json.dump(data, f, indent=2)
 
@@ -270,7 +298,7 @@ def check_ios_app():
         print(f"Release notes: {current_notes}")
     
     # Load stored version for comparison
-    stored_version, last_checked, stored_notes = load_previous_version('ios')
+    stored_version, last_checked, stored_notes = get_latest_version('ios')
     
     if stored_version:
         print(f"Last checked: {last_checked}")
@@ -291,8 +319,8 @@ def check_ios_app():
     else:
         print("\n📝 First time checking iOS app - saving baseline version")
     
-    # Save current version for next check
-    save_current_version(current_version, current_notes or "", 'ios')
+    # Save current version to history
+    save_version_history(current_version, current_notes or "", current_date or "", 'ios')
 
 def check_android_app():
     """Check Android Tesla app version"""
@@ -314,7 +342,7 @@ def check_android_app():
         print(f"What's new: {current_notes}")
     
     # Load stored version for comparison
-    stored_version, last_checked, stored_notes = load_previous_version('android')
+    stored_version, last_checked, stored_notes = get_latest_version('android')
     
     if stored_version:
         print(f"Last checked: {last_checked}")
@@ -335,8 +363,8 @@ def check_android_app():
     else:
         print("\n📝 First time checking Android app - saving baseline version")
     
-    # Save current version for next check
-    save_current_version(current_version, current_notes or "", 'android')
+    # Save current version to history
+    save_version_history(current_version, current_notes or "", current_date or "", 'android')
 
 def main():
     print("🚗 Checking Tesla App Versions...")
